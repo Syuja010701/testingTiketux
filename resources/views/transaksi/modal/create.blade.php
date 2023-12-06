@@ -3,7 +3,7 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h4 class="modal-title" id="modelHeading"></h4>
-                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                 <button type="button" class="btn-close btn-closed" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
                 <form id="transaksi" name="transaksi" class="form-horizontal">
@@ -44,19 +44,19 @@
                     <div class="form-group mb-3">
                         <label for="debit" class="col-sm-6 control-label">Debit</label>
                         <div class="col-sm-12">
-                            <input type="number" class="form-control" id="debit" value="{{ old('debit') }}" name="debit" required="">
+                            <input type="text" class="form-control" id="debit" value="{{ old('debit') }}" name="debit" required="">
                             <div class="text-danger d-none" id="alert-kode_coa" role="alert"></div>
                         </div>
                     </div>      
                      <div class="form-group mb-3">
                         <label for="credit" class="col-sm-6 control-label">Credit</label>
                         <div class="col-sm-12">
-                            <input type="number" class="form-control" id="credit" value="{{ old('credit') }}" name="credit" required="">
+                            <input type="text" class="form-control" id="credit" value="{{ old('credit') }}" name="credit" required="">
                             <div class="text-danger d-none" id="alert-kode_coa" role="alert"></div>
                         </div>
                     </div>           
                     <div class="col-12 text-end">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button type="button" class="btn btn-secondary btn-closed" data-bs-dismiss="modal">Close</button>
                         <button type="submit" class="btn btn-primary" id="saveBtn" value="create">Submit</button>
                     </div>
                 </form>

@@ -38,7 +38,6 @@ class TransaksiController extends Controller
         }
 
         $chartOfAccounts = ChartOfAccount::all();
-
         return view('transaksi.index',compact('chartOfAccounts'));
     }
 
@@ -64,14 +63,19 @@ class TransaksiController extends Controller
             return response()->json($validator->errors(), 422);
         }
 
-       $data = Transaksi::updateOrCreate(
+        $debit = preg_replace("/[^0-9]/", "", $request->debit);
+        $debit = (int) $debit;
+
+        $credit = preg_replace("/[^0-9]/", "", $request->credit);
+        $credit = (int) $credit;
+        $data = Transaksi::updateOrCreate(
             ['id' => $request->id],
             [
                 'coa_id' => $request->kode_coa,
                 'tanggal' => $request->tanggal,
                 'desc' => $request->desc,
-                'debit' => $request->debit,
-                'credit' => $request->credit,
+                'debit' => $debit,
+                'credit' => $credit,
             ]
         );
 

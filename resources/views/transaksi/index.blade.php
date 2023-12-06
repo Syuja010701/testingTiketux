@@ -4,10 +4,9 @@
     <h1>Data Transaksi</h1>
     <div class=" d-grid gap-2 d-flex justify-content-between col-xl-8 mb-3">
         <a href="javascript:void(0)" id="createTransaksi" class="btn btn-primary"><iconify-icon  icon="ic:baseline-plus"></iconify-icon> Tambah Transaksi</a>
-        <a href="" class="btn btn-success"> <iconify-icon  icon="file-icons:microsoft-excel"></iconify-icon> Export </a>
+        {{-- <a href="" class="btn btn-success"> <iconify-icon  icon="file-icons:microsoft-excel"></iconify-icon> Export </a> --}}
     </div>
     <div class="col-xl-8">
-         {{-- {!! $html->table(['class' => 'table table-bordered'], true) !!} --}}
         <table class="table data-table col-xl-8">
             <thead>
                 <tr>
@@ -30,7 +29,30 @@
 @push('script')
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script type="text/javascript">
+   
   $(function () {
+
+     function formatRupiah(input) {
+        let value = input.value.replace(/\D/g, "");
+    
+        let formattedValue = new Intl.NumberFormat("id-ID", {
+            style: "decimal",
+            currency: "IDR",
+            minimumFractionDigits: 0,
+        }).format(value);
+    
+        input.value = "Rp. " + formattedValue;
+    
+    }
+        document.getElementById("debit").addEventListener("keyup", function() {
+            formatRupiah(this);
+        });
+
+        document.getElementById("credit").addEventListener("keyup", function() {
+            formatRupiah(this);
+        });
+
+       
       
     // Token 
     $.ajaxSetup({
@@ -52,8 +74,8 @@
             {data: 'coa_id_kode', name:'coa.kode'},
             {data: 'coa_id_nama', name:'coa.nama'},
             {data: 'desc', name:'desc'},
-            {data: 'debit', name:'debit'},
-            {data: 'credit', name:'credit'},
+            {data: 'debit', name:'debit', render: $.fn.dataTable.render.number( '.', ',', 0, 'Rp ' )},
+            {data: 'credit', name:'credit' ,render: $.fn.dataTable.render.number( '.', ',', 0, 'Rp ' )},
             {data: 'action', name: 'action', orderable: false, searchable: false},
         ]
 
@@ -61,14 +83,34 @@
     });
     // End Data Table
       
+    // button close
+    $('.btn-closed').click(function(){
+        $('#transaksi').trigger("reset");
+        $('#tanggal').attr('disabled', false);
+        $('#kode_coa').attr('disabled', false);
+        $('#nama_coa').attr('disabled', true);
+        $('#desc').attr('disabled', false);
+        $('#debit').attr('disabled', false);
+        $('#credit').attr('disabled', false);
+
+    });
+    // end button close
 
     // Button Show
     $('#createTransaksi').click(function () {
         $('#saveBtn').val("create-kategoriCoa");
         $('#kategoriCoa_id').val('');
-        $('#kategoriCoa').trigger("reset");
+        $('#transaksi').trigger("reset");
         $('#modelHeading').html("Create New Kategori COA");
         $('#ajaxModel').modal('show');
+
+        $('#tanggal').attr('disabled', false);
+        $('#kode_coa').attr('disabled', false);
+        $('#nama_coa').attr('disabled', true);
+        $('#desc').attr('disabled', false);
+        $('#debit').attr('disabled', false);
+        $('#credit').attr('disabled', false);
+
     });
     // end Button
       
@@ -80,17 +122,28 @@
         // console.log(route);
 
       $.get(route, function (data) {
-        // console.log(data);
-          $('#modelHeading').html("Edit Chart Of Account");
-          $('#saveBtn').val("edit-coa");
-          $('#ajaxModel').modal('show');
-          $('#id').val(data.id);
-          $('#tanggal').val(data.tanggal);
-          $('#kode_coa').val(data.coa.id);
-          $('#nama_coa').val(data.coa.nama);
-          $('#desc').val(data.desc);
-          $('#debit').val(data.debit);
-          $('#credit').val(data.credit);
+            let formattedDebit = new Intl.NumberFormat("id-ID", {
+                style: "currency",
+                currency: "IDR",
+                minimumFractionDigits: 0,
+            }).format(data.debit);
+
+            let formattedCredit = new Intl.NumberFormat("id-ID", {
+                style: "currency",
+                currency: "IDR",
+                minimumFractionDigits: 0,
+            }).format(data.credit);
+
+            $('#modelHeading').html("Edit Chart Of Account");
+            $('#saveBtn').val("edit-coa");
+            $('#ajaxModel').modal('show');
+            $('#id').val(data.id);
+            $('#tanggal').val(data.tanggal);
+            $('#kode_coa').val(data.coa.id);
+            $('#nama_coa').val(data.coa.nama);
+            $('#desc').val(data.desc);
+            $('#debit').val(formattedDebit);
+            $('#credit').val(formattedCredit);
       })
     });
     // End Edit Transaksi
@@ -173,9 +226,6 @@
             confirmButtonText: 'YA, HAPUS!'
         }).then((result) => {
             if (result.isConfirmed) {
-
-                // console.log('test');
-
                 $.ajax({
                     url: route,
                     type: "DELETE",
@@ -206,6 +256,19 @@
         route = route.replace(':id', id);
         
         $.get(route, function(data){
+
+             let formattedDebit = new Intl.NumberFormat("id-ID", {
+                style: "currency",
+                currency: "IDR",
+                minimumFractionDigits: 0,
+            }).format(data.debit);
+
+            let formattedCredit = new Intl.NumberFormat("id-ID", {
+                style: "currency",
+                currency: "IDR",
+                minimumFractionDigits: 0,
+            }).format(data.credit);
+
             $('#modelHeading').html("Detail Transaksi");
             $('#saveBtn').val("d-none");
             $('#saveBtn').addClass('d-none')
@@ -216,8 +279,8 @@
             $('#kode_coa').val(data.coa.id);
             $('#nama_coa').val(data.coa.nama);
             $('#desc').val(data.desc);
-            $('#debit').val(data.debit);
-            $('#credit').val(data.credit);
+            $('#debit').val(formattedDebit);
+            $('#credit').val(formattedCredit);
 
             $('#tanggal').attr('disabled', 'disabled');
             $('#kode_coa').attr('disabled', 'disabled');
@@ -244,5 +307,6 @@
     // end select kode
        
   });
+  
 </script>
 @endpush
