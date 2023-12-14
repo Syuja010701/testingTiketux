@@ -12,33 +12,42 @@ class TransaksiController extends Controller
 {
     public function index(Request $request){
 
-        if($request->ajax()){
-            $data = Transaksi::latest()->get();
+         if ($request->ajax()) {
+            $data = Transaksi::latest();
+
+            // Filter berdasarkan kode COA
+            if ($request->has('filter_kode') && $request->filter_kode != 'all') {
+                // dd($request->filter_kode);
+                $data->where('coa_id', $request->filter_kode);
+            }
+
+            
+
+            $data = $data->get();
 
             return DataTables::of($data)
-                     ->addColumn('coa_id_kode', function($item){
-                         return ($item->coa == null ? 'COA Telah Di Hapus!' : $item->coa->kode);
-                    })
-                    ->addColumn('coa_id_nama', function($item){
-                        return ($item->coa == null ? 'COA Telah Di Hapus!' : $item->coa->nama);
+                ->addColumn('coa_id_kode', function ($item) {
+                    return ($item->coa == null ? 'COA Telah Di Hapus!' : $item->coa->kode);
+                })
+                ->addColumn('coa_id_nama', function ($item) {
+                    return ($item->coa == null ? 'COA Telah Di Hapus!' : $item->coa->nama);
+                })
+                ->addColumn('action', function ($row) {
+                    $btn = '<a href="javascript:void(0)" data-toggle="tooltip"  data-id="' . $row->id . '" data-original-title="Edit" class="edit btn btn-warning btn-sm m-1 editTransaksi">Edit</a>';
 
-                    })
-                    ->addColumn('action', function($row){
-                        $btn = '<a href="javascript:void(0)" data-toggle="tooltip"  data-id="'.$row->id.'" data-original-title="Edit" class="edit btn btn-warning btn-sm m-1 editTransaksi">Edit</a>';
-   
-                        $btn = $btn.' <a href="javascript:void(0)" data-toggle="tooltip"  data-id="'.$row->id.'" data-original-title="Delete" class="btn btn-danger btn-sm m-1 deleteTransaksi">Delete</a>';
+                    $btn = $btn . ' <a href="javascript:void(0)" data-toggle="tooltip"  data-id="' . $row->id . '" data-original-title="Delete" class="btn btn-danger btn-sm m-1 deleteTransaksi">Delete</a>';
 
-                        $btn = $btn . '<a href="javascript:void(0)" data-toggle="tooltip"  data-id="'.$row->id.'" data-original-title="Show" class="btn btn-info btn-sm m-1 showTransaksi">Detail</a>';
+                    $btn = $btn . '<a href="javascript:void(0)" data-toggle="tooltip"  data-id="' . $row->id . '" data-original-title="Show" class="btn btn-info btn-sm m-1 showTransaksi">Detail</a>';
 
-                        return $btn;
-                    })
-                    ->addIndexColumn()
-                    ->rawColumns(['action'])
-                    ->make(true);
+                    return $btn;
+                })
+                ->addIndexColumn()
+                ->rawColumns(['action'])
+                ->make(true);
         }
 
         $chartOfAccounts = ChartOfAccount::all();
-        return view('transaksi.index',compact('chartOfAccounts'));
+        return view('transaksi.index', compact('chartOfAccounts'));
     }
 
     public function store(Request $request){
@@ -63,19 +72,14 @@ class TransaksiController extends Controller
             return response()->json($validator->errors(), 422);
         }
 
-        $debit = preg_replace("/[^0-9]/", "", $request->debit);
-        $debit = (int) $debit;
-
-        $credit = preg_replace("/[^0-9]/", "", $request->credit);
-        $credit = (int) $credit;
         $data = Transaksi::updateOrCreate(
             ['id' => $request->id],
             [
                 'coa_id' => $request->kode_coa,
                 'tanggal' => $request->tanggal,
                 'desc' => $request->desc,
-                'debit' => $debit,
-                'credit' => $credit,
+                'debit' => $request->debit,
+                'credit' => $request->credit,
             ]
         );
 

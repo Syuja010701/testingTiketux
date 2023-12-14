@@ -14,7 +14,16 @@ class ChartOfAccountController extends Controller
     public function index(Request $request){
 
         if($request->ajax()){
-            $data = ChartOfAccount::latest()->get();
+          $data = ChartOfAccount::latest();
+
+            // Filter berdasarkan kategori
+            if ($request->has('filter_kategori') && $request->filter_kategori != 'all') {
+                // dd($request->filter_kategori);
+                $data->where('kategori_coa_id', $request->filter_kategori);
+            }
+
+            $data = $data->get();
+
             return DataTables::of($data)
                      ->addColumn('kategori_coa_id', function($item){
                         return ($item->kategoriCoa == null ? 'Kategori COA Telah Di Hapus!' : $item->kategoriCoa->nama);
